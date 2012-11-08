@@ -213,7 +213,7 @@ class HttpFileServer {
         }
 
         header("HTTP/1.1 201 Created"); // respond with correct HTTP header
-        echo "File " . $rel_filename . " created";
+        echo  $rel_filename;
     }
 
     /**
@@ -231,6 +231,37 @@ class HttpFileServer {
         header('Pragma: public');
         header('Content-Length: ' . filesize($filename));
         readfile($filename);
+    }
+
+    /**
+     * Handle DELETE requests - remove file from storage
+     * @throws HttpFileServerException
+     */
+    protected function handleDelete() {
+        $filename = $this->filename;
+        $rel_filename = $this->rel_filename;
+
+        if (file_exists($filename)) {
+            unlink($filename);
+
+            // remove empty subdirectories
+            $path = array_filter(explode(DIRECTORY_SEPARATOR, $rel_filename), function ($el) { return $el !== ''; });
+            array_pop($path); // last part is a filename, leave it out
+
+            while (count($path) > 0) {
+                $rel_directory = implode(DIRECTORY_SEPARATOR, $path);
+                
+                $cur_dir = $this->getOption('storage') . DIRECTORY_SEPARATOR . $rel_directory;
+
+                if (is_dir($cur_dir) && count(scandir($cur_dir)) < 3) { // empty directory contains 2 files: . and ..
+                    rmdir($cur_dir);
+                }
+
+                array_pop($path);
+            }
+        }
+
+        echo  $rel_filename;
     }
 
     /**
