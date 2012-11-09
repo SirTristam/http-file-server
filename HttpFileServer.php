@@ -38,6 +38,7 @@
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @version    $Id$
  * @author     Krzysztof Kotowicz <kkotowicz at gmail dot com>
+ * @author     Valera Leontyev <feedbee at gmail dot com>
  */
 
 /**
@@ -236,6 +237,8 @@ class HttpFileServer {
     /**
      * Handle DELETE requests - remove file from storage
      * @throws HttpFileServerException
+     * @since 20012-11-08
+     * @author Valera Leontyev <feedbee at gmail dot com>
      */
     protected function handleDelete() {
         $filename = $this->filename;
