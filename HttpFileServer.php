@@ -235,6 +235,23 @@ class HttpFileServer {
     }
 
     /**
+     * Handle HEAD requests - check if file axists
+     * @throws HttpFileServerException
+     * @since 20012-11-09
+     * @author Valera Leontyev <feedbee at gmail dot com>
+     */
+    protected function handleHead() {
+        $filename = $this->filename;
+
+        if (!file_exists($filename) ||  !is_file($filename))
+            throw new HttpFileServerException('Not found', 404, 'Could not find file ' . $this->rel_filename);
+
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+    }
+
+    /**
      * Handle DELETE requests - remove file from storage
      * @throws HttpFileServerException
      * @since 20012-11-08
