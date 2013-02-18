@@ -52,6 +52,8 @@
  *
  * $options = array(
  *  'storage' => '/absolute/path/to/file/storage', // without trailing slash. needs writable access
+ *  'chmod_file' => 0644,                          // optional, chmod argument for created files, octal form
+ *  'chmod_dir' => 0755,                           // optional, chmod argument for created directories, octal form
  * );
  *
  * //determine filename to store/fetch
@@ -165,7 +167,7 @@ class HttpFileServer {
         $temp = null;
 
         // create non existing directories for file
-        if (!self::createDirs($this->dirs, $this->getOption('storage') . DIRECTORY_SEPARATOR)) {
+        if (!$this->createDirs($this->dirs, $this->getOption('storage') . DIRECTORY_SEPARATOR)) {
           throw new HttpFileServerException('Could not create file', 501, "Could not create file " . $rel_filename);
         }
 
@@ -202,6 +204,11 @@ class HttpFileServer {
             // rename temp to final file
             if (!rename($temp, $filename))
                 throw new HttpFileServerException("Could not finish writing file", 507, "Could not finish writing file" . $rel_filename);
+			
+			// chmod if needed
+			$chmod = $this->getOption('chmod_file');
+			if ($chmod !== null)
+				chmod($filename, $chmod);
 
         } catch (HttpFileServerException $e) {
             // clean up
@@ -338,15 +345,26 @@ class HttpFileServer {
      * @param string $base_dir base directory we create all subdirectories in
      * @return bool were all directories created?
      */
-    protected static function createDirs($dirs, $base_dir) {
-      $dir_string = $base_dir;
-      foreach ($dirs as $dir) {
-        $dir_string .= $dir . DIRECTORY_SEPARATOR;
-        if (!is_dir($dir_string) && !mkdir($dir_string))
-            return false;
-      }
+    protected function createDirs($dirs, $base_dir) {
+		$dir_string = $base_dir;
+		
+		// chmod if needed
+		$chmod = $this->getOption('chmod_dir');
 
-      return true;
+		foreach ($dirs as $dir) {
+			$dir_string .= $dir . DIRECTORY_SEPARATOR;
+			if (!is_dir($dir_string)) {
+				if (mkdir($dir_string)) {
+					if ($chmod !== null)
+						if (!chmod($dir_string, $chmod))
+							return false;
+				} else {
+					return false;
+				}
+			}
+		}
+	  
+		return true;
     }
 
 }
