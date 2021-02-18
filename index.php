@@ -47,7 +47,7 @@
 require_once 'HttpFileServer.php';
 
 $options = array(
-    'storage' => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'demo',
+    'storage' => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'files',
 );
 
 $filename = !empty($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : (!empty($_GET['url']) ? $_GET['url'] : "/file");

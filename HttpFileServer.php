@@ -151,9 +151,10 @@ class HttpFileServer {
 
     /**
      * Handle POST request - currently forwards to PUT
+     * @throws HttpFileServerException
      */
     protected function handlePost() {
-        return $this->handlePut();
+        $this->handlePut();
     }
 
     /**
@@ -181,7 +182,6 @@ class HttpFileServer {
             // open streams
             $f = fopen($temp, "wb"); // temporary file
             $s = fopen("php://input", "r"); // POST raw data
-            $ok = true;
             if (!$f || !$s) {
                 throw new HttpFileServerException("Could not create file", 504, "Could not create file " . $rel_filename);
             }
@@ -199,7 +199,7 @@ class HttpFileServer {
 
             // remove previous version if exists
             if (file_exists($filename) && !unlink($filename))
-                throw new HttpFileServerException("Could not remove previous file", 506, "Could not remove prevoius version of " . $rel_filename);
+                throw new HttpFileServerException("Could not remove previous file", 506, "Could not remove previous version of " . $rel_filename);
 
             // rename temp to final file
             if (!rename($temp, $filename))
@@ -225,7 +225,7 @@ class HttpFileServer {
     }
 
     /**
-     * Handle GET requests - otuput a file to client
+     * Handle GET requests - output a file to client
      * @throws HttpFileServerException
      */
     protected function handleGet() {
@@ -242,7 +242,7 @@ class HttpFileServer {
     }
 
     /**
-     * Handle HEAD requests - check if file axists
+     * Handle HEAD requests - check if file exists
      * @throws HttpFileServerException
      * @since 20012-11-09
      * @author Valera Leontyev <feedbee at gmail dot com>
@@ -260,7 +260,6 @@ class HttpFileServer {
 
     /**
      * Handle DELETE requests - remove file from storage
-     * @throws HttpFileServerException
      * @since 20012-11-08
      * @author Valera Leontyev <feedbee at gmail dot com>
      */
@@ -332,7 +331,7 @@ class HttpFileServer {
         }
 
         $path = implode(DIRECTORY_SEPARATOR, $absolutes);
-        if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') { // we need to prepend this with "/" on unices
+        if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') { // we need to prepend this with "/" on unicies
             $path = DIRECTORY_SEPARATOR . $path;
         }
 
